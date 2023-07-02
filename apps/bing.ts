@@ -1,4 +1,4 @@
-import {Messagetype, plugin} from "alemon";
+import {Messagetype, plugin, segment} from "alemon";
 import logger from "../utils/logger";
 import {ALRedis} from 'alemon-redis'
 import {Config} from "../utils/config";
@@ -67,6 +67,7 @@ export class bing extends plugin {
             while (retry > 0) {
                 try {
                     sendMsgRes = await sendMsg(bingAIClient, prompt, opt)
+                    break
                 } catch (err) {
                     logger.error('bing对话失败，准备重试', err)
                     retry--
@@ -82,15 +83,24 @@ export class bing extends plugin {
             previousConversationObj.num = previousConversationObj.num + 1
             previousConversationObj.utime = new Date()
             await ALRedis.set(key, JSON.stringify(previousConversationObj))
-            await e.reply(sendMsgRes.response)
+            const obj = segment.reply(e.msg.id);
+            // const obj1 = segment.embed(
+            //     'Sydney的回复',
+            //     prompt,
+            //     "https://q1.qlogo.cn/g?b=qq&nk=330265814&s=0",
+            //     sendMsgRes.response.split('\n').filter(t => !!t)
+            // );
+            await e.reply(sendMsgRes.response.split('\n').filter(t => !!t), obj);
         } catch (err) {
             logger.error('error happened when chatting with bing mode', err)
-            await e.reply(err.message)
+            const obj = segment.reply(e.msg.id);
+            await e.reply(err.message, obj);
         }
         return false
     }
 }
 
 async function sendMsg (client, prompt, opt) {
+    logger.debug(JSON.stringify({prompt, opt}))
     return await client.sendMessage(prompt, opt)
 }

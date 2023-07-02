@@ -31,7 +31,7 @@ export class Logger {
             if (typeof msg !== 'string') {
                 msg = JSON.stringify(msg)
             }
-            console.info(`[${AppName}] - [error] - ${formatDateTime()} ${msg}`)
+            console.info(`[${AppName}] - [info] - ${formatDateTime()} ${msg}`)
         }
     }
 }

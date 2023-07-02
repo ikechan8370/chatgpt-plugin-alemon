@@ -1,4 +1,4 @@
-import {plugin, Messagetype} from "alemon";
+import {plugin, Messagetype, segment} from "alemon";
 import logger from "../utils/logger";
 import {ALRedis} from 'alemon-redis'
 import {Config, defaultOpenAIAPI} from "../utils/config";
@@ -28,7 +28,7 @@ export class api extends plugin {
     }
 
     async chat(e: Messagetype): Promise<boolean> {
-        let prompt = e.msg.content.replace(/^\/chat/, '')
+        const prompt = e.msg.content.replace(/^\/chat/, '')
         logger.info('chat api mode, prompt: ' + prompt)
         try {
             const completionParams: Partial<Omit<
@@ -91,10 +91,12 @@ export class api extends plugin {
             previousConversationObj.num = previousConversationObj.num + 1
             previousConversationObj.utime = new Date()
             await ALRedis.set(key, JSON.stringify(previousConversationObj))
-            await e.reply(sendMsgRes.text)
+            const obj = segment.reply(e.msg.id);
+            await e.reply(sendMsgRes.text, obj);
         } catch (err) {
             logger.error('error happened when chatting with api mode', err)
-            await e.reply(err.message)
+            const obj = segment.reply(e.msg.id);
+            await e.reply(err.message, obj);
         }
         return false
     }
