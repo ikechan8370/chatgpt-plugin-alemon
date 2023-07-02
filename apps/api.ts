@@ -28,7 +28,8 @@ export class api extends plugin {
     }
 
     async chat(e: Messagetype): Promise<boolean> {
-        logger.info('chat api mode, prompt: ' + e.msg.content)
+        let prompt = e.msg.content.replace(/^\/chat/, '')
+        logger.info('chat api mode, prompt: ' + prompt)
         try {
             const completionParams: Partial<Omit<
                 types.openai.CreateChatCompletionRequest,
@@ -84,7 +85,7 @@ export class api extends plugin {
             }
             option.systemMessage = system
 
-            const sendMsgRes = await chatGPTApi.sendMessage(e.msg.content, option)
+            const sendMsgRes = await chatGPTApi.sendMessage(prompt, option)
             logger.debug(sendMsgRes)
             previousConversationObj.parentMessageId = sendMsgRes.id
             previousConversationObj.num = previousConversationObj.num + 1

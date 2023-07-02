@@ -8,10 +8,7 @@ import {KeyvFile} from 'keyv-file'
 import {SydneySendMessageOption} from "../types/bing";
 import _ from 'lodash'
 
-const defaultPropmtPrefix = ', a large language model trained by OpenAI. You answer as concisely as possible for each response (e.g. don’t be verbose). It is very important that you answer as concisely as possible, so please remember this. If you are generating a list, do not have too many items. Keep the number of items short.'
-
-
-export class api extends plugin {
+export class bing extends plugin {
 
 
     constructor() {
@@ -26,7 +23,8 @@ export class api extends plugin {
     }
 
     async bing(e: Messagetype): Promise<boolean> {
-        logger.info('chat bing mode, prompt: ' + e.msg.content)
+        let prompt = e.msg.content.replace(/^\/bing/, '')
+        logger.info('chat bing mode, prompt: ' + prompt)
         try {
             const cacheOptions = {
                 namespace: Config.toneStyle,
@@ -68,7 +66,7 @@ export class api extends plugin {
             let retry = 5
             while (retry > 0) {
                 try {
-                    sendMsgRes = await sendMsg(bingAIClient, e.msg.content, opt)
+                    sendMsgRes = await sendMsg(bingAIClient, prompt, opt)
                 } catch (err) {
                     logger.error('bing对话失败，准备重试', err)
                     retry--
